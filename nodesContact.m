@@ -46,5 +46,11 @@ coord2 = coord2(sort(nodosContacto2),:);
 % y encontrar el nodo mas cercano, ese sera el nodo con el que estara en
 % contacto
 
-numeroNodo = nodoMasCercano(coord1(1,:), coord2);
+numeroNodo = zeros(length(coord1),1);
+
+for k = 1:length(coord1)
+
+    numeroNodo(k) = nodoMasCercano(coord1(k,:), coord2);
+    
+end
 
