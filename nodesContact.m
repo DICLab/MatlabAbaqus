@@ -5,19 +5,20 @@
 
 % Vectores columna
 
-nodosContacto1 =
-nodosContacto2 =
+[nodosContacto1, presion1] = leerCPRESS('beam.txt');
+[nodosContacto2, presion2] = leerCPRESS('disk.txt');
+
 
 % 2) Para esos nodos, importar sus coordenadas
 
 % 2.1) Llamar a coordenadasInp para generar un archivo con las coordenadas
 
-dim = 3;
-nodos = 621; 
+dim = 3; % Dimension del problema
+nodos = 12136; % Numero de nodos del sistema
 archivoLectura = 'beamOnDisk.inp';
-archivoEscritura = 'coordBeamOnDisk.txt';
+coordenadas = 'coordBeamOnDisk.txt';
 
-coordenadasInp(archivoLectura,archivoEscritura,dim,nodos)
+coordenadasInp(archivoLectura,coordenadas,dim,nodos)
 
 % 2.2) Importar el archivo de solo las coordenadas
 
