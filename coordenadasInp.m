@@ -1,38 +1,16 @@
-function coordenadasInp(archivoLectura, archivoEscritura,dim,nodos)
+function C = coordenadasInp(archivoLectura)
 
-% Extraer coordenadas de un archivo inp de Abaqus y guardarlo en otro
-% archivo
-% dim = dimension del problema
-% nodos = numero de nodos
+% Extraer coordenadas de un archivo inp de Abaqus (sin part y assembly). 
+% Devuelve un cell cuyos elementos son las coordenadas de cada pieza en el 
+% sistema global
 
-% Leer inp
+texto = fileread(archivoLectura); % Leer inp
 
-texto = fileread(archivoLectura);
+C = strsplit(texto,'*Node'); % Parte el texto en numero de piezas + 1 trozos. El primer trozo es el heading
+C = C(2:end); % Quitar el heading
 
-% Expresion regular
+C = cellfun(@(x) strsplit(x,'*Element'), C, 'UniformOutput', 0); % Coger el trozo entre *Node y *Element  
 
-if dim==2
+C = cellfun(@(x) x{1}, C, 'UniformOutput', 0); % Hay que quedarse con el primer trozo de cada celda excepto de la primera
 
-    exp = '\d+,[\s-]+[0-9]\.[0-9]+,\s+[0-9.-]+';
-    match = regexp(texto,exp,'match');
-
-else
-    
-    exp = '\d+,[\s-]+[0-9]\.[0-9e,-]+\s+[0-9]\.[0-9e,-]+\s+[0-9e.-]+';
-    match = regexp(texto,exp,'match');
-    
-end
-
-match = match(1:nodos); % Para que no coja nada de mas abajo
-
-
-% Escribir archivo de nodos-coordenadas 
-
-f = fopen(archivoEscritura,'w');
-
-for i=1:length(match)
-
-    fprintf(f,'%s\n', match{i});
-end
-
-fclose(f);
+C = cellfun(@str2num, C, 'UniformOutput', 0); % Convertir el string a numero
