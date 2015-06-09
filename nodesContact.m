@@ -33,11 +33,18 @@ coord2 = coord2(sort(nodosContacto2),:);
 % y encontrar el nodo mas cercano, ese sera el nodo con el que estara en
 % contacto
 
-numeroNodo = zeros(length(coord1),1);
+numeroNodo = zeros(length(coord1),1); % vector con los nodos mas cercanos a nodosContacto1
 
 for k = 1:length(coord1)
 
     numeroNodo(k) = nodoMasCercano(coord1(k,:), coord2);
     
 end
+
+% MEJORAS
+
+% - Convertirlo en una funcion que devuelva el par de contacto [nodosContacto1 numeroNodo]
+% - Iterar sobre el conjunto de nodos mas pequeno
+% - Script que acople las matrices de rigidez de dos piezas segun rigidez de
+%   contacto. Para ello direccion de contacto perpendicular a superficie
 
