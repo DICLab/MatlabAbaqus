@@ -1,13 +1,11 @@
-% Nodos en contacto
+function [nodosContacto1, numeroNodo] = nodesContact(cpress, inp)
 
-clear
-clc
+% Takes CPRESS and inp from Abaqus simulation and computes which are the
+% closest nodes between two surfaces
 
-% 1) Leer CPRESS O CSHEAR para ver cuales son los nodos en contacto en cada
-% pieza
+% 1) Read CPRESS
 
-
-C = leerCPRESS('presion.txt');
+C = leerCPRESS(cpress);
 
 nodosContacto1 = C{1};
 nodosContacto2 = C{2};
@@ -15,36 +13,25 @@ nodosContacto2 = C{2};
 nodosContacto1 = nodosContacto1(:,1);
 nodosContacto2 = nodosContacto2(:,1);
 
+% 2) Import coordinates
 
-% 2) Para esos nodos, importar sus coordenadas
-
-C = coordenadasInp('beamSinAssembly.inp');
+C = coordenadasInp(inp);
 
 coord1 = C{1};
 coord2 = C{2};
 
-% Quedarse solo con los nodos con contacto
+% Take out contact nodes only
 
 coord1 = coord1(sort(nodosContacto1),:);
 coord2 = coord2(sort(nodosContacto2),:);
 
+% 3) Find closest node in surface B to node in surface A
 
-% 3) Para cada nodo de una de las superficies iterar en los nodos de la otra 
-% y encontrar el nodo mas cercano, ese sera el nodo con el que estara en
-% contacto
-
-numeroNodo = zeros(length(coord1),1); % vector con los nodos mas cercanos a nodosContacto1
+numeroNodo = zeros(length(coord1),1); % vector that contains closest nodes to coord1
 
 for k = 1:length(coord1)
 
     numeroNodo(k) = nodoMasCercano(coord1(k,:), coord2);
     
 end
-
-% MEJORAS
-
-% - Convertirlo en una funcion que devuelva el par de contacto [nodosContacto1 numeroNodo]
-% - Iterar sobre el conjunto de nodos mas pequeno
-% - Script que acople las matrices de rigidez de dos piezas segun rigidez de
-%   contacto. Para ello direccion de contacto perpendicular a superficie
 
