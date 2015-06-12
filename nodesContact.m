@@ -26,7 +26,8 @@ coord1 = coord1(sort(nodosContacto1)-coord1(1,1) + 1,:); % just in case it doesn
 coord2 = coord2(sort(nodosContacto2)-coord2(1,1) + 1,:); % index of nodosContacto in coord2 = value - value_first_node +1 because coord2 correlative
 
 % 3) Find closest node in surface B to node in surface A. 
-% Use shortest vector
+% Use shortest vector. Avoid redundance and ensure spring is perpendicular
+% to surface
 
 if length(coord1) <= length(coord2)
 
@@ -42,9 +43,9 @@ if length(coord1) <= length(coord2)
 else
     
     nodosContacto = nodosContacto2;
-    numeroNodo = zeros(length(coord2),1); % vector that contains closest nodes to coord1
+    numeroNodo = zeros(length(coord2),1); % vector that contains closest nodes to coord2
     
-    for k = 1:length(coord1)
+    for k = 1:length(coord2)
 
         numeroNodo(k) = nodoMasCercano(coord2(k,:), coord1);
 
