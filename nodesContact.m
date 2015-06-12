@@ -22,8 +22,8 @@ coord2 = C{2};
 
 % Take out contact nodes only
 
-coord1 = coord1(sort(nodosContacto1),:);
-coord2 = coord2(sort(nodosContacto2),:);
+coord1 = coord1(sort(nodosContacto1)-coord1(1,1) + 1,:); % just in case it doesn't start in one
+coord2 = coord2(sort(nodosContacto2)-coord2(1,1) + 1,:); % index of nodosContacto in coord2 = value - value_first_node +1 because coord2 correlative
 
 % 3) Find closest node in surface B to node in surface A
 
