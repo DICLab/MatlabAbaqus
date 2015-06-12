@@ -8,6 +8,7 @@
 
 clear
 clc
+close all
 
 % Contacto entre cubos 2D
 
@@ -50,37 +51,56 @@ fprintf('Frecuencias naturales sin contacto \n')
 X = sprintf('%0.3f\n',omega);
 disp(X)
 
+% Visualizacion
+
+C = coordenadasInp('contacto.inp');
+
+plot(C{1}(:,2),C{1}(:,3),'.')
+hold on
+plot(C{2}(:,2),C{2}(:,3),'r.')
+
+for i=1:length(C{1}(:,2))
+   
+    text(C{1}(i,2),C{1}(i,3),num2str(C{1}(i,1)))
+    
+end
+
+% for i=1:length(C{2}(:,2))
+%    
+%     text(C{2}(i,2),C{2}(i,3),num2str(C{2}(i,1)))
+%     
+% end
+
 [nodosContacto1, numeroNodo] = nodesContact('presion2D.txt', 'contacto.inp');
 
 % Hacer una matriz sparse de la misma dimension que K con 1 en 
 % (gdl_1,gdl_1) y (gdl_2,gdl_2) y -1 en (gdl_1,gdl_2) y (gdl_2,gdl_1)
 
 % TRANSFORMAR PRIMERO A MODO MATLAB COMO LAS CONDICIONES DE CONTORNO Y
-% COGER LA VERTICAL 
+% COGER LA VERTICAL (en este caso es el 2) 
 
-nodosContacto1 = 2*(nodosContacto1-1) + 2;
-numeroNodo = 2*(numeroNodo-1) + 2;
+nodosContacto1_matlab = 2*(nodosContacto1-1) + 2;
+numeroNodo_matlab = 2*(numeroNodo-1) + 2;
 
-i = [nodosContacto1; numeroNodo; nodosContacto1; numeroNodo];
-j = [nodosContacto1; numeroNodo; numeroNodo; nodosContacto1];
-v = [ones(2*length(nodosContacto1),1); -1*ones(2*length(nodosContacto1),1)];
-
-% Kc([nodosContacto1; numeroNodo], [nodosContacto1; numeroNodo]) = 1;
-% Kc([nodosContacto1; numeroNodo], [numeroNodo; nodosContacto1]) = -1;
+i = [nodosContacto1_matlab; numeroNodo_matlab; nodosContacto1_matlab; numeroNodo_matlab];
+j = [nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab; nodosContacto1_matlab];
+v = [ones(2*length(nodosContacto1_matlab),1); -1*ones(2*length(nodosContacto1_matlab),1)];
 
 Kc = sparse(i,j,v, size(K,1),size(K,2));
 
 k_contacto = 1e11;
 
-K = K + k_contacto*Kc;
-
 % La friccion se incluye igual pero solo en los horizontales (en 2D) para
 % 3D habria que saber la direccion de deslizamiento 
-% nodosContacto1 = 2*(nodosContacto1-1) + 1; % los horizontales
-% numeroNodo = 2*(numeroNodo-1) + 1;
-% K_mu = Kc = sparse(size(K));
-% Kc([nodosContacto1; numeroNodo], [numeroNodo; nodosContacto1]) = -1;
-% K = K + k_contacto*Kc + mu*k_contacto*K_mu
+
+nodosContacto1_matlab = 2*(nodosContacto1-1) + 1; % los horizontales
+numeroNodo_matlab = 2*(numeroNodo-1) + 1;
+
+K_mu = sparse(nodosContacto1_matlab,numeroNodo_matlab,ones(length(nodosContacto1_matlab),1), size(K,1),size(K,2));
+
+mu = 0.3;
+
+K = K + k_contacto*Kc + mu*k_contacto*K_mu;
 
 [~, lambda]=eigs(K,M,10,'sm'); 
 omega = lambda.^0.5/(2*pi);
@@ -92,6 +112,4 @@ omega = sort(omega);
 fprintf('Frecuencias naturales con contacto \n')
 X = sprintf('%0.3f\n',omega);
 disp(X)
-
-
 
