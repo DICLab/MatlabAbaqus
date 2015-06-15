@@ -90,13 +90,21 @@ Kc = sparse(i,j,v, size(K,1),size(K,2));
 
 k_contacto = 1e11;
 
-% La friccion se incluye igual pero solo en los horizontales (en 2D) para
-% 3D habria que saber la direccion de deslizamiento 
+% La friccion se incluye como acoplamiento entre gdl vertical y gdl
+% horizontal, tendra un termino (gdl_H1, gdl_V1) en una pieza y
+% (gdl_H2,gdl_V2)en la otra (gdl_H1, gdl_V1) = - (gdl_H2,gdl_V2)
+% (numero de fila = gdl horizontal, numero de columna gdl vertical)
 
-nodosContacto1_matlab = 2*(nodosContacto1-1) + 1; % los horizontales
-numeroNodo_matlab = 2*(numeroNodo-1) + 1;
+nodosContacto1_matlab_Hor = 2*(nodosContacto1-1) + 1; % los horizontales
+numeroNodo_matlab_Hor = 2*(numeroNodo-1) + 1;
 
-K_mu = sparse(nodosContacto1_matlab,numeroNodo_matlab,ones(length(nodosContacto1_matlab),1), size(K,1),size(K,2));
+i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % numero de fila = gdl horizontal
+j = [nodosContacto1_matlab; numeroNodo_matlab]; % numero de columna = gdl vertical
+v = [ones(length(nodosContacto1_matlab),1); -1*ones(length(nodosContacto1_matlab),1)]; % la primera pieza positiva y la segunda negativa
+
+% primera aproximacion para introducir el contacto! 
+
+K_mu = sparse(i,j,v, size(K,1),size(K,2));
 
 mu = 0.3;
 
