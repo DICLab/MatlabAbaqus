@@ -5,11 +5,11 @@ function C = leerCPRESS(archivo)
 % C{k} es una matriz de dos columnas: la primera son los nodos en contacto
 % y la segunda la presion de contacto
 
-texto = fileread(archivo); % Leer inp
+texto = fileread(archivo); % leer el archivo report de Abaqus
 C = strsplit(texto,'-----------------------------------------------------------------');
 C = C(2:end); % Quitar el heading
 
-C = cellfun(@(x) strsplit(x,'Minimum'), C, 'UniformOutput', 0); % Coger el trozo entre *Node y *Element 
+C = cellfun(@(x) strsplit(x,'Minimum'), C, 'UniformOutput', 0); 
 C = cellfun(@(x) x{1}, C, 'UniformOutput', 0); % Hay que quedarse con el primer trozo de cada celda excepto de la primera
 
 C = cellfun(@str2num, C, 'UniformOutput', 0); % Convertir el string a numero
