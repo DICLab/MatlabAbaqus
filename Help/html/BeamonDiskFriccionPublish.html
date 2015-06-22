@@ -1,0 +1,326 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Beam-on-disk example</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-18"><meta name="DC.source" content="BeamonDiskFriccionPublish.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Beam-on-disk example</h1><!--introduction--><p>Example of computation of natural frequencies using K and M matrices from Abaqus and applying BCs and friction in Matlab</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Import K and M matrices</a></li><li><a href="#6">Boundary conditions</a></li></ul></div><h2>Import K and M matrices<a name="1"></a></h2><p>To export matrices in <tt>.mtx</tt> format from Abaqus the following lines are added to the input file:</p><pre>*STEP, name=exportmatrix
+*MATRIX GENERATE, STIFFNESS, MASS, STRUCTURAL DAMPING
+*MATRIX OUTPUT, STIFFNESS,MASS, STRUCTURAL DAMPING, FORMAT=MATRIX INPUT
+*END STEP</pre><p>Then, the matrices are imported using <tt>import_matrix3D</tt> :</p><pre class="language-matlab">K = import_matrix3D(<span class="string">'libreMatrices_STIF1.mtx'</span>);
+M = import_matrix3D(<span class="string">'libreMatrices_MASS1.mtx'</span>);
+</pre><p>The DOFs are expressed as <tt>3*(Node-1)+direction</tt>, where <tt>direction={1,2,3}</tt></p><h2>Boundary conditions<a name="6"></a></h2><p>To avoid problems applying boundary conditions. Check the "Do not use parts and assembly in input" in Model Attributes</p><pre class="codeinput"><span class="comment">% Nodos de las condiciones de contorno. Aparecen en el inp.</span>
+<span class="comment">% Set-1 quitarle x e y, mantener z</span>
+<span class="comment">% Set-4 empotramiento</span>
+<span class="comment">% Modo Matlab: 3*(viga-1)+1</span>
+
+<span class="comment">% viga =  [181, 182, 183, 184, 185, 186, 187, 188, 189, 601, 602, 603, 604, 609, 610, 611 ...</span>
+<span class="comment">%  614, 615, 616, 619, 620];</span>
+<span class="comment">%</span>
+<span class="comment">% empotramiento =    [622,  623,  624,  625,  626,  627,  628,  629,  630,  631,  632,  633,  930,  931, 2287, 2288 ...</span>
+<span class="comment">%  2289, 2290, 2291, 2292, 2293, 2294, 2295, 2296, 2297, 2298, 2595, 2596, 3954, 3957, 3960, 3962 ...</span>
+<span class="comment">%  3976, 3977, 3979, 3982, 3985, 3989, 4151, 4152, 4155, 4360, 4365, 4367, 4369, 4372, 4375, 4479 ...</span>
+<span class="comment">%  4482, 4486, 4689, 4694, 4695, 5008, 5009, 5012, 5102, 5103, 5105, 5108, 5111, 5115, 5126, 5127 ...</span>
+<span class="comment">%  5130, 5133, 5136, 5138, 8876, 8877];</span>
+
+<span class="comment">% Pasar las BCs a modo Matlab</span>
+
+<span class="comment">% empotramiento = [3*(empotramiento-1)+1, 3*(empotramiento-1)+2, 3*(empotramiento-1)+3];</span>
+<span class="comment">% viga = [3*(viga-1)+1, 3*(viga-1)+2];</span>
+<span class="comment">%</span>
+<span class="comment">% BC = [empotramiento, viga];</span>
+<span class="comment">%</span>
+<span class="comment">% BC = sort(BC,'descend');</span>
+<span class="comment">%</span>
+<span class="comment">% K(BC,:)=[];</span>
+<span class="comment">% K(:,BC)=[];</span>
+<span class="comment">%</span>
+<span class="comment">% M(BC,:)=[];</span>
+<span class="comment">% M(:,BC)=[];</span>
+
+
+<span class="comment">%%%%%%%%%% Frecuencias naturales y modos del sistema original %%%%%%%%%%%%</span>
+
+<span class="comment">% [phi, lambda]=eigs(K,M,20,'sm');</span>
+<span class="comment">% omega = lambda.^0.5/(2*pi);</span>
+<span class="comment">% omega = real(omega(:));</span>
+<span class="comment">% omega = omega(omega &gt; 1);</span>
+<span class="comment">%</span>
+<span class="comment">% omega = sort(omega);</span>
+<span class="comment">%</span>
+<span class="comment">% X = sprintf('%0.3f\n',omega);</span>
+<span class="comment">% disp(X)</span>
+<span class="comment">%</span>
+<span class="comment">% [nodosContacto, numeroNodo] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');</span>
+
+
+<span class="comment">% Hacer una matriz sparse de la misma dimension que K con 1 en</span>
+<span class="comment">% (gdl_1,gdl_1) y (gdl_2,gdl_2) y -1 en (gdl_1,gdl_2) y (gdl_2,gdl_1)</span>
+
+<span class="comment">% TRANSFORMAR PRIMERO A MODO MATLAB COMO LAS CONDICIONES DE CONTORNO Y</span>
+<span class="comment">% COGER LA VERTICAL (en este caso es el 3)</span>
+
+<span class="comment">% nodosContacto1_matlab = 2*(nodosContacto-1) + 3;</span>
+<span class="comment">% numeroNodo_matlab = 2*(numeroNodo-1) + 3;</span>
+<span class="comment">%</span>
+<span class="comment">% i = [nodosContacto1_matlab; numeroNodo_matlab; nodosContacto1_matlab; numeroNodo_matlab];</span>
+<span class="comment">% j = [nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab; nodosContacto1_matlab];</span>
+<span class="comment">% v = [ones(2*length(nodosContacto1_matlab),1); -1*ones(2*length(nodosContacto1_matlab),1)];</span>
+<span class="comment">%</span>
+<span class="comment">% Kc = sparse(i,j,v, size(K,1),size(K,2));</span>
+<span class="comment">%</span>
+<span class="comment">% k_contacto = 1e10;</span>
+<span class="comment">%</span>
+<span class="comment">% K = K + k_contacto*Kc;</span>
+<span class="comment">%</span>
+<span class="comment">% [~, lambda]=eigs(K,M,20,'sm');</span>
+<span class="comment">%</span>
+<span class="comment">% omega = lambda.^0.5; % Me dan cambiados el real y el imaginario por el tema de la raiz</span>
+<span class="comment">% omega = real(omega(:))/(2*pi);</span>
+<span class="comment">% omega = omega(omega &gt; 1);</span>
+<span class="comment">% omega = sort(omega);</span>
+<span class="comment">%</span>
+<span class="comment">% fprintf('Frecuencias naturales con contacto \n')</span>
+<span class="comment">% X = sprintf('%0.3f\n',omega);</span>
+<span class="comment">% disp(X)</span>
+
+<span class="comment">% La friccion se incluye como acoplamiento entre gdl vertical y gdl</span>
+<span class="comment">% horizontal, tendra un termino (gdl_H1, gdl_V1) en una pieza y</span>
+<span class="comment">% (gdl_H2,gdl_V2)en la otra (gdl_H1, gdl_V1) = - (gdl_H2,gdl_V2)</span>
+<span class="comment">% (numero de fila = gdl horizontal, numero de columna gdl vertical)</span>
+
+<span class="comment">% nodosContacto1_matlab_Hor = [2*(nodosContacto-1) + 1; 2*(nodosContacto-1) + 2];</span>
+<span class="comment">% numeroNodo_matlab_Hor = [2*(numeroNodo-1) + 1;2*(numeroNodo-1) + 1];</span>
+<span class="comment">%</span>
+<span class="comment">% i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % numero de fila = gdl horizontal</span>
+<span class="comment">% j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; % numero de columna = gdl vertical</span>
+<span class="comment">% v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_matlab_Hor),1)]; % la primera pieza positiva y la segunda negativa</span>
+
+<span class="comment">% primera aproximacion para introducir el contacto!</span>
+
+<span class="comment">% K_mu = sparse(i,j,v, size(K,1),size(K,2));</span>
+<span class="comment">%</span>
+<span class="comment">% mu = 0.5;</span>
+<span class="comment">%</span>
+<span class="comment">% K = K + k_contacto*Kc + mu*k_contacto*K_mu;</span>
+<span class="comment">%</span>
+<span class="comment">% [~, lambda]=eigs(K,M,20,'sm');</span>
+<span class="comment">%</span>
+<span class="comment">% omega = lambda.^0.5; % Me dan cambiados el real y el imaginario por el tema de la raiz</span>
+<span class="comment">% omega = real(omega(:))/(2*pi);</span>
+<span class="comment">% omega = omega(omega &gt; 1);</span>
+<span class="comment">% omega = sort(omega);</span>
+<span class="comment">%</span>
+<span class="comment">% fprintf('Frecuencias naturales con friccion \n')</span>
+<span class="comment">% X = sprintf('%0.3f\n',omega);</span>
+<span class="comment">% disp(X)</span>
+
+<span class="comment">% Falta tener en cuenta las direcciones de deslizamiento. De momento se</span>
+<span class="comment">% supone que afecta por igual la friccion a los dos gdl horizontales y que</span>
+<span class="comment">% en un pieza todos los terminos son negativos y en la otra todos</span>
+<span class="comment">% positivos. Esto dependera de las direcciones de deslizamiento</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Beam-on-disk example
+% Example of computation of natural frequencies using K and M matrices from
+% Abaqus and applying BCs and friction in Matlab
+
+%%% Import K and M matrices
+% To export matrices in |.mtx| format from Abaqus the following lines are 
+% added to the input file:
+%
+%%
+%  *STEP, name=exportmatrix
+%  *MATRIX GENERATE, STIFFNESS, MASS, STRUCTURAL DAMPING
+%  *MATRIX OUTPUT, STIFFNESS,MASS, STRUCTURAL DAMPING, FORMAT=MATRIX INPUT
+%  *END STEP
+%% 
+% Then, the matrices are imported using |import_matrix3D| :
+%%
+%   K = import_matrix3D('libreMatrices_STIF1.mtx');
+%   M = import_matrix3D('libreMatrices_MASS1.mtx');
+%%
+% The DOFs are expressed as |3*(Node-1)+direction|, where |direction={1,2,3}|
+%
+%%% Boundary conditions
+% To avoid problems applying boundary conditions. Check the "Do not use 
+% parts and assembly in input" in Model Attributes
+
+% Nodos de las condiciones de contorno. Aparecen en el inp. 
+% Set-1 quitarle x e y, mantener z
+% Set-4 empotramiento
+% Modo Matlab: 3*(viga-1)+1 
+
+% viga =  [181, 182, 183, 184, 185, 186, 187, 188, 189, 601, 602, 603, 604, 609, 610, 611 ...
+%  614, 615, 616, 619, 620];
+% 
+% empotramiento =    [622,  623,  624,  625,  626,  627,  628,  629,  630,  631,  632,  633,  930,  931, 2287, 2288 ...
+%  2289, 2290, 2291, 2292, 2293, 2294, 2295, 2296, 2297, 2298, 2595, 2596, 3954, 3957, 3960, 3962 ...
+%  3976, 3977, 3979, 3982, 3985, 3989, 4151, 4152, 4155, 4360, 4365, 4367, 4369, 4372, 4375, 4479 ...
+%  4482, 4486, 4689, 4694, 4695, 5008, 5009, 5012, 5102, 5103, 5105, 5108, 5111, 5115, 5126, 5127 ...
+%  5130, 5133, 5136, 5138, 8876, 8877];
+
+% Pasar las BCs a modo Matlab
+
+% empotramiento = [3*(empotramiento-1)+1, 3*(empotramiento-1)+2, 3*(empotramiento-1)+3];
+% viga = [3*(viga-1)+1, 3*(viga-1)+2];
+% 
+% BC = [empotramiento, viga];
+% 
+% BC = sort(BC,'descend');
+% 
+% K(BC,:)=[];
+% K(:,BC)=[];
+% 
+% M(BC,:)=[];
+% M(:,BC)=[];
+
+
+%%%%%%%%%% Frecuencias naturales y modos del sistema original %%%%%%%%%%%%
+
+% [phi, lambda]=eigs(K,M,20,'sm'); 
+% omega = lambda.^0.5/(2*pi);
+% omega = real(omega(:));
+% omega = omega(omega > 1);
+% 
+% omega = sort(omega);
+% 
+% X = sprintf('%0.3f\n',omega);
+% disp(X)
+% 
+% [nodosContacto, numeroNodo] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');
+
+
+% Hacer una matriz sparse de la misma dimension que K con 1 en 
+% (gdl_1,gdl_1) y (gdl_2,gdl_2) y -1 en (gdl_1,gdl_2) y (gdl_2,gdl_1)
+
+% TRANSFORMAR PRIMERO A MODO MATLAB COMO LAS CONDICIONES DE CONTORNO Y
+% COGER LA VERTICAL (en este caso es el 3) 
+
+% nodosContacto1_matlab = 2*(nodosContacto-1) + 3;
+% numeroNodo_matlab = 2*(numeroNodo-1) + 3;
+% 
+% i = [nodosContacto1_matlab; numeroNodo_matlab; nodosContacto1_matlab; numeroNodo_matlab];
+% j = [nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab; nodosContacto1_matlab];
+% v = [ones(2*length(nodosContacto1_matlab),1); -1*ones(2*length(nodosContacto1_matlab),1)];
+% 
+% Kc = sparse(i,j,v, size(K,1),size(K,2));
+% 
+% k_contacto = 1e10;
+% 
+% K = K + k_contacto*Kc;
+% 
+% [~, lambda]=eigs(K,M,20,'sm'); 
+% 
+% omega = lambda.^0.5; % Me dan cambiados el real y el imaginario por el tema de la raiz
+% omega = real(omega(:))/(2*pi);
+% omega = omega(omega > 1);
+% omega = sort(omega);
+% 
+% fprintf('Frecuencias naturales con contacto \n')
+% X = sprintf('%0.3f\n',omega);
+% disp(X)
+
+% La friccion se incluye como acoplamiento entre gdl vertical y gdl
+% horizontal, tendra un termino (gdl_H1, gdl_V1) en una pieza y
+% (gdl_H2,gdl_V2)en la otra (gdl_H1, gdl_V1) = - (gdl_H2,gdl_V2)
+% (numero de fila = gdl horizontal, numero de columna gdl vertical)
+
+% nodosContacto1_matlab_Hor = [2*(nodosContacto-1) + 1; 2*(nodosContacto-1) + 2]; 
+% numeroNodo_matlab_Hor = [2*(numeroNodo-1) + 1;2*(numeroNodo-1) + 1];
+% 
+% i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % numero de fila = gdl horizontal
+% j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; % numero de columna = gdl vertical
+% v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_matlab_Hor),1)]; % la primera pieza positiva y la segunda negativa
+
+% primera aproximacion para introducir el contacto! 
+
+% K_mu = sparse(i,j,v, size(K,1),size(K,2));
+% 
+% mu = 0.5;
+% 
+% K = K + k_contacto*Kc + mu*k_contacto*K_mu;
+% 
+% [~, lambda]=eigs(K,M,20,'sm'); 
+% 
+% omega = lambda.^0.5; % Me dan cambiados el real y el imaginario por el tema de la raiz
+% omega = real(omega(:))/(2*pi);
+% omega = omega(omega > 1);
+% omega = sort(omega);
+% 
+% fprintf('Frecuencias naturales con friccion \n')
+% X = sprintf('%0.3f\n',omega);
+% disp(X)
+
+% Falta tener en cuenta las direcciones de deslizamiento. De momento se 
+% supone que afecta por igual la friccion a los dos gdl horizontales y que 
+% en un pieza todos los terminos son negativos y en la otra todos
+% positivos. Esto dependera de las direcciones de deslizamiento
+
+
+
+
+##### SOURCE END #####
+--></body></html>

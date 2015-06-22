@@ -69,8 +69,8 @@ disp(X)
 % TRANSFORMAR PRIMERO A MODO MATLAB COMO LAS CONDICIONES DE CONTORNO Y
 % COGER LA VERTICAL (en este caso es el 3) 
 
-nodosContacto1_matlab = 2*(nodosContacto-1) + 3;
-numeroNodo_matlab = 2*(numeroNodo-1) + 3;
+nodosContacto1_matlab = 3*(nodosContacto-1) + 3;
+numeroNodo_matlab = 3*(numeroNodo-1) + 3;
 
 i = [nodosContacto1_matlab; numeroNodo_matlab; nodosContacto1_matlab; numeroNodo_matlab];
 j = [nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab; nodosContacto1_matlab];
@@ -98,8 +98,8 @@ disp(X)
 % (gdl_H2,gdl_V2)en la otra (gdl_H1, gdl_V1) = - (gdl_H2,gdl_V2)
 % (numero de fila = gdl horizontal, numero de columna gdl vertical)
 
-nodosContacto1_matlab_Hor = [2*(nodosContacto-1) + 1; 2*(nodosContacto-1) + 2]; 
-numeroNodo_matlab_Hor = [2*(numeroNodo-1) + 1;2*(numeroNodo-1) + 1];
+nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2]; 
+numeroNodo_matlab_Hor = [3*(numeroNodo-1) + 1; 3*(numeroNodo-1) + 2];
 
 i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % numero de fila = gdl horizontal
 j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; % numero de columna = gdl vertical
@@ -109,7 +109,7 @@ v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_ma
 
 K_mu = sparse(i,j,v, size(K,1),size(K,2));
 
-mu = 0.5;
+mu = 0.3;
 
 K = K + k_contacto*Kc + mu*k_contacto*K_mu;
 
