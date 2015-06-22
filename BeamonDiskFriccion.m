@@ -111,7 +111,7 @@ K_mu = sparse(i,j,v, size(K,1),size(K,2));
 
 mu = 0.3;
 
-K = K + k_contacto*Kc + mu*k_contacto*K_mu;
+K = K + mu*k_contacto*K_mu; % porque K ya incluye el contacto
 
 [~, lambda]=eigs(K,M,20,'sm'); 
 
