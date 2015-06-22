@@ -1,11 +1,13 @@
-function [nodosContacto, numeroNodo] = nodesContact(cpress, inp)
+function [nodosContacto, numeroNodo, alfa] = nodesContact(cpress, inp)
 
 % Takes CPRESS and inp from Abaqus simulation and computes which are the
 % closest nodes between two surfaces
 
 % 1) Read CPRESS
 
-C = leerCPRESS(cpress);
+% C = leerCPRESS(cpress);
+
+[C, alfa]= leerContacto(cpress);
 
 nodosContacto1 = C{1};
 nodosContacto2 = C{2};

@@ -60,7 +60,7 @@ omega = sort(omega);
 X = sprintf('%0.3f\n',omega);
 disp(X)
 
-[nodosContacto, numeroNodo] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');
+[nodosContacto, numeroNodo, alfa] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');
 
 
 % Hacer una matriz sparse de la misma dimension que K con 1 en 
@@ -92,6 +92,8 @@ omega = sort(omega);
 fprintf('Frecuencias naturales con contacto \n')
 X = sprintf('%0.3f\n',omega);
 disp(X)
+
+%%%%%%%%%%%%%%%%%%%  TODO: DIRECCIONES DE DESLIZAMIENTO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % La friccion se incluye como acoplamiento entre gdl vertical y gdl
 % horizontal, tendra un termino (gdl_H1, gdl_V1) en una pieza y
