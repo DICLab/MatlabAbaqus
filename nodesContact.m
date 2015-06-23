@@ -15,6 +15,9 @@ nodosContacto2 = C{2};
 nodosContacto1 = nodosContacto1(:,1);
 nodosContacto2 = nodosContacto2(:,1);
 
+alfa1 = alfa{1};
+alfa2 = alfa{2};
+
 % 2) Import coordinates
 
 C = coordenadasInp(inp);
@@ -31,14 +34,19 @@ coord2 = coord2(sort(nodosContacto2)-coord2(1,1) + 1,:); % index of nodosContact
 % Use shortest vector. Avoid redundance and ensure spring is perpendicular
 % to surface
 
+% TODO: 4) Find sliding direction for each contact pair
+
 if length(coord1) <= length(coord2)
 
     nodosContacto = nodosContacto1;
     numeroNodo = zeros(length(coord1),1); % vector that contains closest nodes to coord1
+    alfa = zeros(length(coord1),1); % vector that contains sliding direction of contact pair (same angle but opposite direction)
+    angulo = alfa1;
 
     for k = 1:length(coord1)
 
         numeroNodo(k) = nodoMasCercano(coord1(k,:), coord2);
+        alfa(k) = angulo(angulo(:,1)== nodosContacto(k),2); 
 
     end
 
@@ -46,10 +54,13 @@ else
     
     nodosContacto = nodosContacto2;
     numeroNodo = zeros(length(coord2),1); % vector that contains closest nodes to coord2
+    alfa = zeros(length(coord2),1);
+    angulo = alfa2;
     
     for k = 1:length(coord2)
 
         numeroNodo(k) = nodoMasCercano(coord2(k,:), coord1);
+        alfa(k,:) = angulo(angulo(:,1)== nodosContacto(k),:); 
 
     end
     

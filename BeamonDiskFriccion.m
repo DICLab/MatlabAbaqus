@@ -60,7 +60,7 @@ omega = sort(omega);
 X = sprintf('%0.3f\n',omega);
 disp(X)
 
-[nodosContacto, numeroNodo, alfa] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');
+[nodosContacto, numeroNodo, alfa] = nodesContact('presion3.txt', 'beamSinAssembly.inp');
 
 
 % Hacer una matriz sparse de la misma dimension que K con 1 en 
@@ -93,19 +93,19 @@ fprintf('Frecuencias naturales con contacto \n')
 X = sprintf('%0.3f\n',omega);
 disp(X)
 
-%%%%%%%%%%%%%%%%%%%  TODO: DIRECCIONES DE DESLIZAMIENTO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % La friccion se incluye como acoplamiento entre gdl vertical y gdl
 % horizontal, tendra un termino (gdl_H1, gdl_V1) en una pieza y
 % (gdl_H2,gdl_V2)en la otra (gdl_H1, gdl_V1) = - (gdl_H2,gdl_V2)
 % (numero de fila = gdl horizontal, numero de columna gdl vertical)
 
-nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2]; 
+nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2]; % nodosContacto misma longitud que alfa
 numeroNodo_matlab_Hor = [3*(numeroNodo-1) + 1; 3*(numeroNodo-1) + 2];
+
+ang = [cos(alfa); sin(alfa)];
 
 i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % numero de fila = gdl horizontal
 j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; % numero de columna = gdl vertical
-v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_matlab_Hor),1)]; % la primera pieza positiva y la segunda negativa
+v = [ones(length(nodosContacto1_matlab_Hor),1).*ang; -1*ones(length(nodosContacto1_matlab_Hor),1).*ang]; % la primera pieza positiva y la segunda negativa
 
 % primera aproximacion para introducir el contacto! 
 
