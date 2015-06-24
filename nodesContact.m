@@ -60,7 +60,7 @@ else
     for k = 1:length(coord2)
 
         numeroNodo(k) = nodoMasCercano(coord2(k,:), coord1);
-        alfa(k,:) = angulo(angulo(:,1)== nodosContacto(k),:); 
+        alfa(k) = angulo(angulo(:,1)== nodosContacto(k),2); 
 
     end
     

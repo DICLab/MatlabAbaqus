@@ -126,10 +126,5 @@ fprintf('Frecuencias naturales con friccion \n')
 X = sprintf('%0.3f\n',omega);
 disp(X)
 
-% Falta tener en cuenta las direcciones de deslizamiento. De momento se 
-% supone que afecta por igual la friccion a los dos gdl horizontales y que 
-% en un pieza todos los terminos son negativos y en la otra todos
-% positivos. Esto dependera de las direcciones de deslizamiento
-
 
 
