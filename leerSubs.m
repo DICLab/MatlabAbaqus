@@ -1,13 +1,16 @@
-clear
-clc
+function [K, M] = leerSubs(archivo)
 
-% Leer subestructura
+% Lee archivo mtx de subestructura exportado de Abaqus mediante
+% *SUBSTRUCTURE MATRIX OUTPUT, OUTPUT FILE=USER DEFINED, 
+% FILE NAME=substructure, STIFFNESS=YES, MASS=YES
 
 % 1) Importar archivo
 
-texto = fileread('substructure.mtx'); % % leer el archivo report de Abaqus
+texto = fileread(archivo); % % leer el archivo report de Abaqus
 
-% 2) Partir en trozo de elementos, K y M
+% 2) Partir en trozo de nodos, K y M. La parte de nodos puede usarse para
+% saber automaticamente cuantos gdl se retienen, pero probablemente sea
+% mas facil preguntar.
 
 % Delimitadores
 
@@ -20,28 +23,19 @@ C = strsplit(texto,{stiff, mass});
 
 C = C(2:end);
 
-% 3) Interpretar K y M segun elementos
+% 3) Interpretar K y M 
 
-% Contador que inicie en uno y represente la fila en la que estoy en la
-% matriz (i)
+% Extraer todos los numeros del archivo en un unico vector
 
-% Ir avanzando columnas (j) hasta que j = i.
+C = cellfun(@(x) strrep(x, ',', ' '), C, 'UniformOutput', 0); % sustituir la coma por espacio
+C = cellfun(@(x) strsplit(x,' '), C, 'UniformOutput', 0); % partir por el espacio
 
-% Cuando j = i saltar linea, i = i+1
-% Cuando j sea multiplo de 4 saltar de linea, i se mantiene 
-
-% Repetir hasta tener nodos * gdl filas
-
-% OTRA OPCION
-
-% Sacar todos los numeros. Crear un vector con las posiciones. Crear la
-% sparse
-
-C = cellfun(@(x) strrep(x, ',', ' '), C, 'UniformOutput', 0); 
-C = cellfun(@(x) strsplit(x,' '), C, 'UniformOutput', 0); 
+% Convertir a numero
 
 C{1} = cellfun(@str2num, C{1}, 'UniformOutput',0);
 C{2} = cellfun(@str2num, C{2}, 'UniformOutput',0);
+
+% Coger solo las celdas con contenido
 
 C{1} = [C{1}{:}];
 C{2} = [C{2}{:}];
@@ -51,20 +45,24 @@ C{2} = [C{2}{:}];
 % Total de filas que tendra la matriz:
 
 total = (sqrt(1+8*length(C{1}))-1)/2; % el numero de elementos de una matriz triangular es (n^2 + n)/2. 
-% Da este numero resolviendo para (n^2 + n)/2 = longitud_vector
+% Da este numero resolviendo para (n^2 + n)/2 = longitud_vector y cogiendo
+% el positivo
 
 pos1=[]; 
 pos2=[];
 
 for i =1:total
     
-    pos1 = [pos1, ones(1,i)*i];
-    pos2=[pos2, 1:i];
+    pos1 = [pos1, ones(1,i)*i]; % [ 1 2 2 3 3 3 4 4 4 4 ...]
+    pos2 = [pos2, 1:i]; % [ 1 1 2 1 2 3 1 2 3 4 ...]
     
 end
 
 
-A=sparse(pos1,pos2,C{1}); % triangulo inferior
+K = sparse(pos1,pos2,C{1}); % triangulo inferior
+M = sparse(pos1,pos2,C{2}); % triangulo inferior
 
-spy(A)
+spy(K), title('Stiffness matrix')
+figure
+spy(M), title('Mass matrix')
 
