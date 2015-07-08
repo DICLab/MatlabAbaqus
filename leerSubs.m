@@ -1,3 +1,6 @@
+clear
+clc
+
 % Leer subestructura
 
 % 1) Importar archivo
@@ -42,3 +45,26 @@ C{2} = cellfun(@str2num, C{2}, 'UniformOutput',0);
 
 C{1} = [C{1}{:}];
 C{2} = [C{2}{:}];
+
+% Generar el triangulo de posiciones
+
+% Total de filas que tendra la matriz:
+
+total = (sqrt(1+8*length(C{1}))-1)/2; % el numero de elementos de una matriz triangular es (n^2 + n)/2. 
+% Da este numero resolviendo para (n^2 + n)/2 = longitud_vector
+
+pos1=[]; 
+pos2=[];
+
+for i =1:total
+    
+    pos1 = [pos1, ones(1,i)*i];
+    pos2=[pos2, 1:i];
+    
+end
+
+
+A=sparse(pos1,pos2,C{1}); % triangulo inferior
+
+spy(A)
+
