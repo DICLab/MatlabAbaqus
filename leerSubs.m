@@ -78,8 +78,7 @@ for i = (total-1):-1:1
     
 end
 
-% Elegir terminos de M y de K que esten en las posiciones [pos3 pos4] de
-% alguna manera y meterlos en superiorK y superiorM
+% Elegir terminos de M y de K que esten en las posiciones [pos4 pos3] y meterlos en superiorK y superiorM
 
 superiorK = K(sub2ind(size(K),pos4,pos3)); % convertir posiciones a indice sencillo, con indice doble coge filas y columnas
 superiorM = M(sub2ind(size(M),pos4,pos3));
