@@ -66,3 +66,31 @@ spy(K), title('Stiffness matrix')
 figure
 spy(M), title('Mass matrix')
 
+% Crear vectores de posicion de triangulo superior, usar K y M anteriores para crear nueva matriz completa
+
+pos3=[]; 
+pos4=[];
+
+for i = (total-1):-1:1
+    
+    pos3 = [pos3, ones(1,i)*(total-i)]; % [ 1 1 1 1 ... 1 2 2 ...2 ] fila
+    pos4 = [pos4, (total-i+1):total]; % [2...n 3...n 4...n ] columna
+    
+end
+
+% Elegir terminos de M y de K que esten en las posiciones [pos3 pos4] de
+% alguna manera y meterlos en superiorK y superiorM
+
+superiorK = K(sub2ind(size(K),pos4,pos3)); % convertir posiciones a indice sencillo, con indice doble coge filas y columnas
+superiorM = M(sub2ind(size(M),pos4,pos3));
+
+K = sparse([pos1 pos3],[pos2 pos4],[C{1} superiorK]); 
+M = sparse([pos1 pos3],[pos2 pos4],[C{2} superiorM]); 
+
+figure
+spy(K)
+figure
+spy(M)
+
+
+% Comprobar simetria: issymmetric
