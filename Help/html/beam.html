@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Beam-on-disk example</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-06-22"><meta name="DC.source" content="BeamonDiskFriccionPublish.m"><style type="text/css">
+      --><title>Beam-on-disk example</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-07-21"><meta name="DC.source" content="beam.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -84,7 +84,7 @@ omega = lambda.^0.5/(2*pi);
 omega = real(omega(:));
 omega = omega(omega &gt; 1);
 omega = sort(omega);
-</pre><h2>Contact<a name="15"></a></h2><p>Closest nodes to a surface from the other one are found using <tt>nodesContact</tt> function:</p><pre class="language-matlab">[nodosContacto, numeroNodo] = nodesContact(<span class="string">'presionBeam.txt'</span>, <span class="string">'beamSinAssembly.inp'</span>);
+</pre><h2>Contact<a name="15"></a></h2><p>Closest nodes to a surface from the other one are found using <tt>nodesContact</tt> function:</p><pre class="language-matlab">[nodosContacto, numeroNodo, alfa] = nodesContact(<span class="string">'presion3.txt'</span>, <span class="string">'beamSinAssembly.inp'</span>);
 </pre><p><tt>[nodosContacto, numeroNodo]</tt> are the pair of nodes closest to each other.</p><p>Contact stiffness matrix is a sparse matrix the same size as <tt>K</tt> that has a <tt>1</tt> un every (dof_1,dof_1) and (dof_2,dof_2) position and a <tt>-1</tt> in the (dof_1,dof_2) and (dof_2,dof_1) positions in the vertical direction. It has to be converted to Matlab. In this case the vertical direction is <tt>3</tt>, so :</p><pre class="language-matlab">nodosContacto1_matlab = 3*(nodosContacto-1) + 3;
 numeroNodo_matlab = 3*(numeroNodo-1) + 3;
 </pre><pre class="language-matlab">i = [nodosContacto1_matlab; numeroNodo_matlab; nodosContacto1_matlab; numeroNodo_matlab];
@@ -98,11 +98,12 @@ omega = lambda.^0.5/(2*pi);
 omega = real(omega(:));
 omega = omega(omega &gt; 1);
 omega = sort(omega);
-</pre><h2>Friction<a name="23"></a></h2><p>The contribution of friction to stiffness matrix is a sparse matrix the same size as <tt>K</tt> that couples vertical and horizontal degrees of freedom. It has a <tt>1</tt> in the (dof_H1, dof_V1) position in one component and a (dof_H2, dof_V2) = - (dof_H1,dof_V1) term in the other component (TODO: sliding directions must be taken into account, for now it is supposed that friction affects equally in both directions in the plane). Doing the same as before:</p><pre class="language-matlab">nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2];
+</pre><h2>Friction<a name="23"></a></h2><p>The contribution of friction to stiffness matrix is a sparse matrix the same size as <tt>K</tt> that couples vertical and horizontal degrees of freedom. It has a term in the (dof_H1, dof_V1) position in one component and a (dof_H2, dof_V2) = - (dof_H1,dof_V1) term in the other component.</p><p>Abaqus exports nodal variables in global coordinates, so CSHEAR1 is the shear in direction 1 and CSHEAR2 shear in direcion 2. With this information the sliding direction can be computed for each point and take it into account into the stiffness matrix Doing the same as before:</p><pre class="language-matlab">nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2];
 numeroNodo_matlab_Hor = [3*(numeroNodo-1) + 1; 3*(numeroNodo-1) + 2];
+ang = [cos(alfa); sin(alfa)];
 </pre><pre class="language-matlab">i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; <span class="comment">% row number = horizontal dof</span>
 j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; <span class="comment">% column number = vertical dof</span>
-v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_matlab_Hor),1)]; <span class="comment">% first component positive and second negative</span>
+v = [ones(length(nodosContacto1_matlab_Hor),1).*ang; -1*ones(length(nodosContacto1_matlab_Hor),1).*ang]; <span class="comment">% first component positive and second negative</span>
 </pre><pre class="language-matlab">K_mu = sparse(i,j,v, size(K,1),size(K,2));
 mu = 0.3;
 K = K + mu*k_contacto*K_mu;
@@ -170,7 +171,7 @@ K = K + mu*k_contacto*K_mu;
 % Closest nodes to a surface from the other one are found using
 % |nodesContact| function:
 %%
-%   [nodosContacto, numeroNodo] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');
+%   [nodosContacto, numeroNodo, alfa] = nodesContact('presion3.txt', 'beamSinAssembly.inp');
 %%
 % |[nodosContacto, numeroNodo]| are the pair of nodes closest to each
 % other.
@@ -206,18 +207,23 @@ K = K + mu*k_contacto*K_mu;
 %
 %%% Friction
 % The contribution of friction to stiffness matrix is a sparse matrix the same size as |K| that 
-% couples vertical and horizontal degrees of freedom. It has a |1| in the (dof_H1, dof_V1)
+% couples vertical and horizontal degrees of freedom. It has a term in the (dof_H1, dof_V1)
 % position in one component and a (dof_H2, dof_V2) = - (dof_H1,dof_V1) term
-% in the other component (TODO: sliding directions must be taken into account, for now
-% it is supposed that friction affects equally in both directions in the plane). 
+% in the other component.
+%
+% Abaqus exports nodal variables in global coordinates, so CSHEAR1 is the
+% shear in direction 1 and CSHEAR2 shear in direcion 2. With this
+% information the sliding direction can be computed for each point and take
+% it into account into the stiffness matrix
 % Doing the same as before: 
 %%
 %   nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2]; 
 %   numeroNodo_matlab_Hor = [3*(numeroNodo-1) + 1; 3*(numeroNodo-1) + 2];
-%   
+%   ang = [cos(alfa); sin(alfa)];
+% 
 %   i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % row number = horizontal dof
 %   j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; % column number = vertical dof
-%   v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_matlab_Hor),1)]; % first component positive and second negative
+%   v = [ones(length(nodosContacto1_matlab_Hor),1).*ang; -1*ones(length(nodosContacto1_matlab_Hor),1).*ang]; % first component positive and second negative
 %
 %   K_mu = sparse(i,j,v, size(K,1),size(K,2));
 %   mu = 0.3;

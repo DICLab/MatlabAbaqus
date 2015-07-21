@@ -60,7 +60,7 @@
 % Closest nodes to a surface from the other one are found using
 % |nodesContact| function:
 %%
-%   [nodosContacto, numeroNodo] = nodesContact('presionBeam.txt', 'beamSinAssembly.inp');
+%   [nodosContacto, numeroNodo, alfa] = nodesContact('presion3.txt', 'beamSinAssembly.inp');
 %%
 % |[nodosContacto, numeroNodo]| are the pair of nodes closest to each
 % other.
@@ -96,18 +96,23 @@
 %
 %%% Friction
 % The contribution of friction to stiffness matrix is a sparse matrix the same size as |K| that 
-% couples vertical and horizontal degrees of freedom. It has a |1| in the (dof_H1, dof_V1)
+% couples vertical and horizontal degrees of freedom. It has a term in the (dof_H1, dof_V1)
 % position in one component and a (dof_H2, dof_V2) = - (dof_H1,dof_V1) term
-% in the other component (TODO: sliding directions must be taken into account, for now
-% it is supposed that friction affects equally in both directions in the plane). 
+% in the other component.
+%
+% Abaqus exports nodal variables in global coordinates, so CSHEAR1 is the
+% shear in direction 1 and CSHEAR2 shear in direcion 2. With this
+% information the sliding direction can be computed for each point and take
+% it into account into the stiffness matrix
 % Doing the same as before: 
 %%
 %   nodosContacto1_matlab_Hor = [3*(nodosContacto-1) + 1; 3*(nodosContacto-1) + 2]; 
 %   numeroNodo_matlab_Hor = [3*(numeroNodo-1) + 1; 3*(numeroNodo-1) + 2];
-%   
+%   ang = [cos(alfa); sin(alfa)];
+% 
 %   i = [nodosContacto1_matlab_Hor; numeroNodo_matlab_Hor]; % row number = horizontal dof
 %   j = [nodosContacto1_matlab; nodosContacto1_matlab; numeroNodo_matlab; numeroNodo_matlab]; % column number = vertical dof
-%   v = [ones(length(nodosContacto1_matlab_Hor),1); -1*ones(length(nodosContacto1_matlab_Hor),1)]; % first component positive and second negative
+%   v = [ones(length(nodosContacto1_matlab_Hor),1).*ang; -1*ones(length(nodosContacto1_matlab_Hor),1).*ang]; % first component positive and second negative
 %
 %   K_mu = sparse(i,j,v, size(K,1),size(K,2));
 %   mu = 0.3;
