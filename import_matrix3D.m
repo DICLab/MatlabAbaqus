@@ -1,34 +1,35 @@
 function matlab_matrix = import_matrix3D(mtx_file)
 
-% Importa matrices de Abaqus 3D
+% Importa matrices 3D de archivo .mtx de Abaqus
 % Usa 3*(nodo1-1)+gdl para pasar a gdlGlobal1 gdlGlobal2 valor
+% Extendido de código en http://www.eng.ox.ac.uk/stress/
 
-%============== Import Stiffness Matrix ==============%
-abaqus_stiffness_matrix = dlmread(mtx_file);
+% Archivo mtx. Columnas:
+% 1) Número de nodo fila 
+% 2) Gdl nodo fila (1,2 o 3)
+% 3) Número de nodo columna
+% 4) Gdl nodo columna (1,2 o 3)
+% 5) Valor 
 
-% Quita la parte con nodos con valores negativos
+abaqus_matrix = dlmread(mtx_file);
 
-nodosPos1 = abaqus_stiffness_matrix(:,1)>0; % Nodos positivos en posicion 1 
-nodosPos2 = abaqus_stiffness_matrix(:,3)>0; % Nodos positivos en posicion 2
-nodosPos = nodosPos1&nodosPos2; % Nodos positivos en posicion 1 y 2
-abaqus_stiffness_matrix = abaqus_stiffness_matrix(nodosPos,:);
+% Utilizar info de número de nodo y gdl para pasar a gdl global
+matlab_nodes(:,1) = 3*(abaqus_matrix(:,1)-1)+ abaqus_matrix(:,2);
+matlab_nodes(:,2) = 3*(abaqus_matrix(:,3)-1)+ abaqus_matrix(:,4);
 
-% merge node number info from column 1 and DOF info from column 2 and
-% store in the 1st column of a new matrix
-matlab_nodes(:,1) = 3*(abaqus_stiffness_matrix(:,1)-1)+ ...
-abaqus_stiffness_matrix(:,2);
-% merge node number info from column 3 and DOF info from column 4 and
-% store in the 2nd column of a new matrix
-matlab_nodes(:,2) = 3*(abaqus_stiffness_matrix(:,3)-1)+ ...
-abaqus_stiffness_matrix(:,4);
-% extract the stiffness values from the .mtx file, and store in a double
-% length vector
-stiffness_values = [abaqus_stiffness_matrix(:,5); ...
-abaqus_stiffness_matrix(:,5)];
-% create a matrix of the new matlab node numbers, and a vector of indices
-% of their position in the abaqus stiffness matrix
-[matlab_matrix_indices, abaqus_stiffness_value_index] = unique( ...
+% Extraer valores de la matrix. Duplicar para triángulo superior e inferior
+values = [abaqus_matrix(:,5); abaqus_matrix(:,5)];
+
+% Crear una matriz de los nuevos números de nodoy su posición en la matriz 
+% de Abaqus.  
+% [matlab_nodes; matlab_nodes(:,2) matlab_nodes(:,1)] --> la segunda parte
+% representa los valores del triángulo inferior, los simétricos. Unique es
+% necesario para no repetir los valores de la diagonal. 
+
+[matlab_matrix_indices, abaqus_value_index] = unique( ...
 [matlab_nodes; matlab_nodes(:,2) matlab_nodes(:,1)], 'rows');
-% compile the stiffness matrix using the new node numbering convention
-matlab_matrix = accumarray( matlab_matrix_indices, ...
-stiffness_values(abaqus_stiffness_value_index), [], @max, [], true);
+
+% Crear la nueva matriz. Busca el valor de la matriz entre el nodo i y el j
+% y llena la matriz. Como ese valor estará tanto en i j como en j i solo 
+% hay que coger 1, de ahí que use @max porque por defecto suma
+matlab_matrix = accumarray(matlab_matrix_indices, values(abaqus_value_index), [], @max, [], true);
