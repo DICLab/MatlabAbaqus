@@ -50,7 +50,7 @@ M(:,BC)=[];
 
 %%%%%%%%%% Frecuencias naturales y modos del sistema original %%%%%%%%%%%%
 
-[phi, lambda]=eigs(K,M,20,'sm'); 
+[phi, lambda]=eigs(K,M,30,'sm'); 
 omega = lambda.^0.5/(2*pi);
 omega = real(omega(:));
 omega = omega(omega > 1);
@@ -78,11 +78,11 @@ v = [ones(2*length(nodosContacto1_matlab),1); -1*ones(2*length(nodosContacto1_ma
 
 Kc = sparse(i,j,v, size(K,1),size(K,2));
 
-k_contacto = 1e10;
+k_contacto = 1e6;
 
 K = K + k_contacto*Kc;
 
-[~, lambda]=eigs(K,M,20,'sm'); 
+[~, lambda]=eigs(K,M,30,'sm'); 
 
 omega = lambda.^0.5; % Me dan cambiados el real y el imaginario por el tema de la raiz
 omega = real(omega(:))/(2*pi);
@@ -115,7 +115,7 @@ mu = 0.3;
 
 K = K + mu*k_contacto*K_mu; % porque K ya incluye el contacto
 
-[~, lambda]=eigs(K,M,20,'sm'); 
+[~, lambda]=eigs(K,M,30,'sm'); 
 
 omega = lambda.^0.5; % Me dan cambiados el real y el imaginario por el tema de la raiz
 omega = real(omega(:))/(2*pi);
